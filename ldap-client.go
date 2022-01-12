@@ -26,6 +26,9 @@ type Client struct {
 	UseSSL             bool
 	SkipTLS            bool
 	ClientCertificates []tls.Certificate // Adding client certificates
+	TimeOut            int
+	ServiceType        int
+	ChaseReferrals     string
 }
 
 // Connect connects to the ldap backend.
@@ -95,9 +98,9 @@ func (lc *Client) FindUser(username string) (map[string]string, error) {
 		lc.Base,
 		ldap.ScopeWholeSubtree,
 		ldap.NeverDerefAliases,
-		0,     // Unlimited results
-		0,     // Search Timeout
-		false, // Types only
+		0,          // Unlimited results
+		lc.TimeOut, // Search Timeout
+		false,      // Types only
 		fmt.Sprintf(lc.UserFilter, username),
 		attributes,
 		nil,
@@ -168,7 +171,7 @@ func (lc *Client) GetGroupsOfUser(username string) ([]string, error) {
 		lc.Base,
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases,
 		0,
-		0,
+		lc.TimeOut,
 		false,
 		fmt.Sprintf(lc.GroupFilter, username),
 		[]string{"cn"}, // can it be something else than "cn"?
